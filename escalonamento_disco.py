@@ -1,12 +1,15 @@
 import numpy as np
-
+import sys
 class Disco:
     def __init__(self):
         self.entrada = []
-        with open('input.txt') as file:
+        '''with open('input.txt') as file:
             self.entrada = file.readlines()
-            file.close()
-
+            file.close()'''
+        for l in sys.stdin:
+            if l == '\n':
+                break
+            self.entrada.append(l)
         self.entrada = [int(i) for i in self.entrada]
         self.raio = self.entrada[0]
         self.pos_inicial = self.entrada[1]
