@@ -3,9 +3,6 @@ import sys
 class Disco:
     def __init__(self):
         self.entrada = []
-        '''with open('input.txt') as file:
-            self.entrada = file.readlines()
-            file.close()'''
         for l in sys.stdin:
             if l == '\n':
                 break
