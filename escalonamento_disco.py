@@ -43,6 +43,7 @@ class Disco:
         distancias = np.absolute(np.array(sorted(self.entrada))-self.pos_inicial)
         return distancias[-1]*2+distancias[0]
 
-print(Disco().FCFS())
-print(Disco().SSTF())
-print(Disco().SCAN())
+escalonador = Disco()
+print('FCFS',escalonador.FCFS())
+print('SSTF',escalonador.SSTF())
+print('ELEVADOR',escalonador.SCAN())
