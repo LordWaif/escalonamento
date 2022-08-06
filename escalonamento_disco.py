@@ -40,7 +40,6 @@ class Disco:
         return distancia_total
 
     def SCAN(self):
-        self.entrada.append(self.pos_inicial)
         distancias = np.absolute(np.array(sorted(self.entrada))-self.pos_inicial)
         return distancias[-1]*2+distancias[0]
 
