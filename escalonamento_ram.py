@@ -100,26 +100,20 @@ class RAM:
         INSTANTE = 0
         paginas = []
         for i in self.entrada:
-            print('ref ',i)
-            if (INSTANTE+1)%4 == 0:
-                for j in paginas:
-                    j.setbRef(False)
+            #print('Referencia: ',i,' Ints: ',INSTANTE)
             if len(paginas) < self.n_moldura:
                 paginas.append(Pagina(i,INSTANTE))
-                if (INSTANTE+1)%4 == 0:
-                    paginas[-1].setbRef(False)
             else:
                 maior_idade,ind_maior = -1,-1
                 isSwitch = False
                 falta = (len([j for j in paginas if i == j.getAddr()]) == 0)
-                print([[i.getAddr(),i.getbRef(),i.getLastUse()] for i in paginas])
                 for ind in range(len(paginas)):
                     if falta:
                         if paginas[ind].getbRef() == True:
                             paginas[ind].setLastUse(INSTANTE)
                         else:
                             if (INSTANTE - paginas[ind].getLastUse()) > limiar:
-                                print(paginas[ind].getAddr(),i)
+                                #print('Saiu: ',paginas[ind].getAddr(),' Entrou: ',i)
                                 falta_pags += 1
                                 isSwitch = True
                                 paginas[ind] = Pagina(i,INSTANTE)
@@ -134,7 +128,14 @@ class RAM:
                 if falta and not(isSwitch):
                     falta_pags += 1
                     paginas[ind_maior] = Pagina(i,INSTANTE)
+            #print([[i.getAddr(),i.getbRef(),i.getLastUse(),INSTANTE-i.getLastUse()] for i in paginas])
             INSTANTE +=1
+            if (INSTANTE)%4 == 0:
+                #print('Zerando bitRef')
+                for j in paginas:
+                    j.setbRef(False)
+                #print([[i.getAddr(),i.getbRef(),i.getLastUse(),INSTANTE-i.getLastUse()] for i in paginas])
+                #print('--------------')
         return falta_pags
 
 escalonador = RAM()

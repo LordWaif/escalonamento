@@ -1,10 +1,15 @@
+#%%
 import numpy as np
 import sys
 import random as rd
 from fila import Fila
+from io import StringIO
 
 class CPU:
-    def __init__(self):
+    def __init__(self,path='inputcpu.txt'):
+        import os
+        if(os.path.exists(path)):
+            sys.stdin = StringIO(open(path).read())
         self.entrada = []
         count = 0
         for l in sys.stdin:
@@ -71,20 +76,33 @@ class CPU:
         return np.mean(RETORNO_MEDIO),np.mean(RESPOSTA_MEDIA),np.mean(ESPERA_MEDIA)
 
     def RoundRobin(self,quantum):
+        from graphs import GraphGenerate
         EXECUTADOS = []
         EXCLUIDOS = []
         RETORNO_MEDIO,RESPOSTA_MEDIA,ESPERA_MEDIA = [],[],[]
         fila_circular = Fila(self.entrada)
+        qtd = len(self.entrada)
         QUANTUM = quantum
         INSTANTE = 0
+        HISTORY = []
         while(np.sum(fila_circular.getAll()[:,1]) !=0):
-            #print(fila_circular.getAll())
-            #Executando
             processo = fila_circular.getHead()
-            #print('Antes ->',processo,INSTANTE)
             if processo[0] > INSTANTE:
-                INSTANTE += 1
-                continue
+                fila_circular.consume()
+                processo_c = fila_circular.getHead()
+                is_ready = False
+                while(processo[3]!=processo_c[3]):
+                    if processo_c[0]<INSTANTE:
+                        is_ready = True
+                        break
+                    else:
+                        fila_circular.consume()
+                        processo_c = fila_circular.getHead()
+                if not(is_ready):
+                    INSTANTE += 1
+                    continue
+                else:
+                    processo = processo_c
             int_ini = processo[1]
             if processo[1] >= QUANTUM:
                 processo[1] -= QUANTUM
@@ -93,18 +111,17 @@ class CPU:
             int_fin = processo[1]
             fila_circular.setHead(processo)
             fila_circular.consume()
-            INSTANTE += abs(int_fin - int_ini)
-            #print('Depois ->',processo,INSTANTE)
             if processo[3] not in EXECUTADOS:
                 RESPOSTA_MEDIA.append(INSTANTE-processo[0])
                 EXECUTADOS.append(processo[3])
+            INSTANTE += abs(int_fin - int_ini)
             if processo[1] == 0:
-                #print(INSTANTE,processo[0])
                 RETORNO_MEDIO.append(INSTANTE - processo[0])
-                #print(INSTANTE,processo[0])
                 ESPERA_MEDIA.append(INSTANTE - processo[0] - processo[4])
                 EXCLUIDOS.append(processo[3])
                 fila_circular.removeZeros()
+            HISTORY.append(list(processo)+[INSTANTE,abs(int_fin - int_ini)])
+        GraphGenerate().graphCPU('RR',INSTANTE,HISTORY,qtd)
         self.entrada = self.copy_entrada.copy()
         return np.mean(RETORNO_MEDIO),np.mean(RESPOSTA_MEDIA),np.mean(ESPERA_MEDIA)
 
@@ -115,3 +132,4 @@ rr = escalonador.RoundRobin(2)
 print('PRI {:.2f} {:.2f} {:.2f}'.format(pri[0],pri[1],pri[2]))
 print('LOT {:.2f} {:.2f} {:.2f}'.format(lot[0],lot[1],lot[2]))
 print('RR {:.2f} {:.2f} {:.2f}'.format(rr[0],rr[1],rr[2]))
+# %%
