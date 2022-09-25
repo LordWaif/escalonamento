@@ -25,6 +25,9 @@ class CPU:
         INSTANTE = 0
         while(np.sum(self.entrada[:,1]) !=0):
             prontos = self.entrada[np.where(self.entrada[:,0] <= INSTANTE)]
+            while(len(prontos)==0):
+                INSTANTE += 1
+                prontos = self.entrada[np.where(self.entrada[:,0] <= INSTANTE)]
             indice_maior = np.argmax(prontos[:,2])
             if self.entrada[indice_maior,3] not in EXECUTADOS:
                 RESPOSTA_MEDIA.append(INSTANTE-self.entrada[indice_maior,0])
@@ -47,9 +50,11 @@ class CPU:
         RETORNO_MEDIO,RESPOSTA_MEDIA,ESPERA_MEDIA = [],[],[]
         INSTANTE = 0
         while(np.sum(self.entrada[:,1]) !=0):
-            escolhido = rd.randint(self.entrada[:,3][0],self.entrada[:,3][-1])
-            while(escolhido in EXCLUIDOS):
-                escolhido = rd.randint(self.entrada[:,3][0],self.entrada[:,3][-1])
+            if not(any(self.entrada[:,0]<=INSTANTE)):
+                INSTANTE += 1
+                continue
+            valores_possiveis = self.entrada[np.where(self.entrada[:,0] <=INSTANTE),3]
+            escolhido = rd.choice(valores_possiveis[0])            
             indice = np.where(self.entrada[:,3] == escolhido)
             if self.entrada[indice,3] not in EXECUTADOS:
                 RESPOSTA_MEDIA.append(INSTANTE-self.entrada[indice,0])
@@ -76,6 +81,10 @@ class CPU:
             #print(fila_circular.getAll())
             #Executando
             processo = fila_circular.getHead()
+            #print('Antes ->',processo,INSTANTE)
+            if processo[0] > INSTANTE:
+                INSTANTE += 1
+                continue
             int_ini = processo[1]
             if processo[1] >= QUANTUM:
                 processo[1] -= QUANTUM
@@ -84,12 +93,15 @@ class CPU:
             int_fin = processo[1]
             fila_circular.setHead(processo)
             fila_circular.consume()
+            INSTANTE += abs(int_fin - int_ini)
+            #print('Depois ->',processo,INSTANTE)
             if processo[3] not in EXECUTADOS:
                 RESPOSTA_MEDIA.append(INSTANTE-processo[0])
                 EXECUTADOS.append(processo[3])
-            INSTANTE += abs(int_fin - int_ini)
             if processo[1] == 0:
+                #print(INSTANTE,processo[0])
                 RETORNO_MEDIO.append(INSTANTE - processo[0])
+                #print(INSTANTE,processo[0])
                 ESPERA_MEDIA.append(INSTANTE - processo[0] - processo[4])
                 EXCLUIDOS.append(processo[3])
                 fila_circular.removeZeros()
