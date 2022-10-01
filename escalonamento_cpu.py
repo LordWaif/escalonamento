@@ -6,10 +6,7 @@ from fila import Fila
 from io import StringIO
 
 class CPU:
-    def __init__(self,path='inputcpu.txt'):
-        import os
-        if(os.path.exists(path)):
-            sys.stdin = StringIO(open(path).read())
+    def __init__(self):
         self.entrada = []
         count = 0
         for l in sys.stdin:
@@ -28,6 +25,7 @@ class CPU:
         EXECUTADOS = []
         RETORNO_MEDIO,RESPOSTA_MEDIA,ESPERA_MEDIA = [],[],[]
         INSTANTE = 0
+        self.entrada = self.entrada[self.entrada[:, 0].argsort()]
         while(np.sum(self.entrada[:,1]) !=0):
             prontos = self.entrada[np.where(self.entrada[:,0] <= INSTANTE)]
             while(len(prontos)==0):
@@ -80,6 +78,7 @@ class CPU:
         EXECUTADOS = []
         EXCLUIDOS = []
         RETORNO_MEDIO,RESPOSTA_MEDIA,ESPERA_MEDIA = [],[],[]
+        #self.entrada = self.entrada[self.entrada[:, 0].argsort()]
         fila_circular = Fila(self.entrada)
         qtd = len(self.entrada)
         QUANTUM = quantum
@@ -121,7 +120,10 @@ class CPU:
                 EXCLUIDOS.append(processo[3])
                 fila_circular.removeZeros()
             HISTORY.append(list(processo)+[INSTANTE,abs(int_fin - int_ini)])
-        GraphGenerate().graphCPU('RR',INSTANTE,HISTORY,qtd)
+        try:
+            GraphGenerate().graphCPU('RR',INSTANTE,HISTORY,qtd)
+        except:
+            pass
         self.entrada = self.copy_entrada.copy()
         return np.mean(RETORNO_MEDIO),np.mean(RESPOSTA_MEDIA),np.mean(ESPERA_MEDIA)
 

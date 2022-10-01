@@ -41,6 +41,8 @@ class Disco:
 
     def SCAN(self):
         distancias = np.absolute(np.array(sorted(self.entrada))-self.pos_inicial)
+        if(len(distancias)==0):
+            return 0
         return distancias[-1]*2+distancias[0]
 
 escalonador = Disco()
